@@ -1,10 +1,13 @@
 import Head from 'next/head';
-import { CustomAppProps } from '@/types';
+import { CustomAppProps } from '@/types'
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import Layout from '@/components/layout';
 import localFont from 'next/font/local';
 import { ThemeProvider } from "next-themes"
 
 import '@/styles/globals.css';
+import { useEffect, useState } from 'react';
+import { TruckElectric } from 'lucide-react';
 
 const RalewayFont = localFont({
 	src: [
@@ -28,6 +31,27 @@ const RalewayFont = localFont({
 })
 
 function App({ Component }: CustomAppProps) {
+	const [ queryClient ] = useState(() => new QueryClient({
+		defaultOptions: {
+			queries: {
+				retry: false,
+				refetchOnWindowFocus: false,
+			}
+		}
+	}))
+	const [ mswReady, setMswReady ] = useState(false)
+
+	// na potrzeby zadania
+	useEffect(() => {
+		import('@/pages/mocks/browser').then(({ worker }) => {
+			worker.start({
+				onUnhandledRequest: 'bypass',
+			}).then(() => setMswReady(true))
+		})
+	}, [])
+
+	if (!mswReady) return null
+
 	return(
 		<>
 			<Head>
@@ -36,12 +60,14 @@ function App({ Component }: CustomAppProps) {
 			</Head>
 			<ThemeProvider
 				attribute="class"
-				defaultTheme='system'
+				defaultTheme='light'
 			>
 				<main className={RalewayFont.className}>
-					<Layout>
-						<Component/>
-					</Layout>
+					<QueryClientProvider client={queryClient}>
+						<Layout>
+							<Component/>
+						</Layout>
+					</QueryClientProvider>
 				</main>
 			</ThemeProvider>
 		</>

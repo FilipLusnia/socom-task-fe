@@ -5,8 +5,7 @@ export const handleApiResponse = async ({ resp }: { resp: Response }) => {
 	const response = await resp.json()
 
 	if (!resp.ok) {
-		showError({ msg: 'przykldowa tresc bledu' })
-		throw new Error(response.status)
+		throw new Error(response.message ?? 'Unknown error')
 	}
 
 	return response
