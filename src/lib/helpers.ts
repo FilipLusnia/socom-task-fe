@@ -1,5 +1,6 @@
 import { toast } from "sonner"
 import { z } from "zod"
+import { OrderStatusType } from "@/schema"
 
 export const handleApiResponse = async ({ resp }: { resp: Response }) => {
 	const response = await resp.json()
@@ -20,4 +21,18 @@ export const handleZodError = (err?: z.ZodError) => {
 			description: msg,
 		})
 	}
+}
+
+export const ORDER_TRANSITIONS: Record<OrderStatusType, OrderStatusType[]> = {
+	NOWE: ["OPŁACONE", "ANULOWANE"],
+	OPŁACONE: ["SPAKOWANE", "ANULOWANE"],
+	SPAKOWANE: ["WYSŁANE"],
+	WYSŁANE: ["DOSTARCZONE"],
+	DOSTARCZONE: ["ZWROT"],
+	ZWROT: [],
+	ANULOWANE: [],
+}
+
+export function canChangeStatus(from: OrderStatusType, to: OrderStatusType) {
+	return ORDER_TRANSITIONS[from].includes(to)
 }

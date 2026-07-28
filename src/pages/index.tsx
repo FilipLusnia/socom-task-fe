@@ -32,11 +32,11 @@ export default function Dashboard() {
 	})
 	const [ selectedOrder, setSelectedOrder ] = useState<number | null>(null)
 
-	const hasFilters = query && (
-		query.search?.length ||
-		query.status?.length ||
-		!!query.dateFrom ||
-		!!query.dateTo
+	const hasFilters = Boolean(
+		query.search ||
+		(Array.isArray(query.status) ? query.status.length : query.status) ||
+		query.dateFrom ||
+		query.dateTo
 	)
 
 	const changePage = (page: number) => {

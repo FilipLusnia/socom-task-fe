@@ -47,3 +47,7 @@ export const GetOrdersSchema = z.object({
 	orders: z.array(OrderSchema),
 	pagination: PaginationSchema
 })
+
+export const ChangeOrderStatusSchema = z.object({
+	status: OrderStatusSchema,
+})

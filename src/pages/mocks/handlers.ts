@@ -2,8 +2,9 @@ import { http, HttpResponse } from 'msw'
 import { orders } from './data-generator'
 import { simulateNetwork } from './utils'
 import { DEFAULT_PAGE_SIZE, PAGE_SIZES } from '@/lib/constants'
-import { OrderStatusType } from '@/schema'
+import { ChangeOrderStatusSchema, OrderStatusType } from '@/schema'
 import { endOfDay, isAfter, isBefore, parseISO, startOfDay } from "date-fns"
+import { canChangeStatus } from '@/lib/helpers'
 
 export const handlers = [
 	http.get('/api/orders', async ({ request }) => {
@@ -118,7 +119,7 @@ export const handlers = [
 
 		if (error) return error
 
-		const body = await request.json() as { status: OrderStatusType }
+		const body = ChangeOrderStatusSchema.parse(await request.json())
 		const order = orders.find(o => o.id === Number(params.id))
 
 		if (!order) {
@@ -128,9 +129,31 @@ export const handlers = [
 			)
 		}
 
-		order.status = body.status
+		if (!canChangeStatus(order.status, body.status)) {
+			return HttpResponse.json(
+				{ message: `Nie można zmienić statusu z ${order.status} na ${body.status}` },
+				{ status: 409 }
+			)
+		}
 
-		return HttpResponse.json(order)
+		const previousStatus = order.status
+		const updatedOrder = {
+			...order,
+			status: body.status,
+			orderHistory: [
+				...(order.orderHistory ?? []),
+				{
+					from: previousStatus,
+					to: body.status,
+					createdAt: new Date().toISOString(),
+				},
+			],
+		}
+
+		const index = orders.findIndex(item => item.id === order.id)
+		orders[index] = updatedOrder
+
+		return HttpResponse.json(updatedOrder)
 	}),
 
 	http.post('/api/orders/bulk-status', async () => {
