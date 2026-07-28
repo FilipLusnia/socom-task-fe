@@ -5,11 +5,13 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { OrderType } from '@/schema';
 import { useRouter } from 'next/router';
 import { format } from 'date-fns';
+import type { Dispatch, SetStateAction } from 'react';
 
-export default function OrdersTable({ orders, isLoading, sortFunc }: { 
+export default function OrdersTable({ orders, isLoading, sortFunc, setSelectedOrder }: { 
 	orders: OrderType[] | undefined 
 	isLoading: boolean 
 	sortFunc: (sortBy: 'createdAt' | 'total') => void
+	setSelectedOrder: Dispatch<SetStateAction<number | null>>
 }) {
 	const router = useRouter()
 
@@ -82,10 +84,7 @@ export default function OrdersTable({ orders, isLoading, sortFunc }: {
 								{order.status}
 							</TableCell>
 							<TableCell className="text-right">
-								<Button>S</Button>
-								<Link href={`/order/${order.id}`}>
-									<Button>Z</Button>
-								</Link>
+								<Button onClick={() => setSelectedOrder(order.id)}>Szczegóły</Button>
 							</TableCell>
 						</TableRow>
 					)}

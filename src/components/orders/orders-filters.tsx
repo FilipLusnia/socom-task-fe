@@ -28,24 +28,27 @@ export default function OrdersFilters() {
 	}
 
 	return (
-		<div className="flex gap-4">
-			<Select
-				value={String(router.query.status || 'Wszystkie')}
-				onValueChange={value => updateFilter('status', value === 'Wszystkie' ? undefined : String(value))}
-			>
-				<SelectTrigger className="w-40">
-					<SelectValue placeholder="Status" />
-				</SelectTrigger>
+		<div className="flex gap-8">
+			<div>
+				<small className="inline-block mb-1">Status</small>
+				<Select
+					value={String(router.query.status || 'Wszystkie')}
+					onValueChange={value => updateFilter('status', value === 'Wszystkie' ? undefined : String(value))}
+				>
+					<SelectTrigger className="w-40">
+						<SelectValue placeholder="Status" />
+					</SelectTrigger>
 
-				<SelectContent>
-					<SelectItem value="Wszystkie">Wszystkie</SelectItem>
-					{statuses.map(status =>
-						<SelectItem key={status} value={status}>
-							{status}
-						</SelectItem>
-					)}
-				</SelectContent>
-			</Select>
+					<SelectContent>
+						<SelectItem value="Wszystkie">Wszystkie</SelectItem>
+						{statuses.map(status =>
+							<SelectItem key={status} value={status}>
+								{status}
+							</SelectItem>
+						)}
+					</SelectContent>
+				</Select>
+			</div>
 
 			<DateRangePicker
 				getDate={({ dateFrom, dateTo }) => {

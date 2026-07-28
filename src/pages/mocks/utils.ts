@@ -5,7 +5,7 @@ export async function simulateNetwork() {
 
 	if (Math.random() < 0.05) {
 		return HttpResponse.json(
-			{ message: 'Internal Server Error' },
+			{ message: 'Symulowany błąd 500' },
 			{ status: 500 },
 		)
 	}

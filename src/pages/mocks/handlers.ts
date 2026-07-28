@@ -83,7 +83,10 @@ export const handlers = [
 		const end = start + limit
 
 		return HttpResponse.json({
-			orders: filteredOrders.slice(start, end),
+			orders: filteredOrders
+				.slice(start, end)
+				.map(({ items, orderHistory, ...order }) => order)
+			,
 			pagination: {
 				page,
 				limit,
@@ -105,8 +108,8 @@ export const handlers = [
 
 		return HttpResponse.json({
 			...order,
-			items: [],
-			statusHistory: [],
+			items: order.items,
+			orderHistory: order.orderHistory,
 		})
 	}),
 

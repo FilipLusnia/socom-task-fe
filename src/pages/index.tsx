@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button"
 import DebouncedInput from "@/components/debounced-input"
 import PaginationLimit from "@/components/orders/orders-pagination-limit"
 import OrdersFilters from "@/components/orders/orders-filters"
+import { OrderSidebar } from "@/components/order-sidebar"
 
 export default function Dashboard() {
 	const router = useRouter()
@@ -19,7 +20,7 @@ export default function Dashboard() {
 
 	const [ pageInput, setPageInput ] = useState(String(query.page))
 	const [search, setSearch] = useState(
-		typeof query.search === 'string' ? query.search : undefined
+		typeof query.search === 'string' ? query.search : ''
 	)
 
 	const { data, isLoading, error, refetch } = useQuery({
@@ -29,6 +30,7 @@ export default function Dashboard() {
 			.then(resp => handleApiResponse({ resp }))
 			.then(data => GetOrdersSchema.parse(data)),
 	})
+	const [ selectedOrder, setSelectedOrder ] = useState<number | null>(null)
 
 	const hasFilters = query && (
 		query.search?.length ||
@@ -49,6 +51,8 @@ export default function Dashboard() {
 	}
 
 	const searchFunc = (value?: string) => {
+		if (router.query.search === value) return
+
 		const q = {
 			...router.query,
 			page: 1,
@@ -103,7 +107,7 @@ export default function Dashboard() {
 	useEffect(() => {
 		if (error?.cause === 500) {
 			toast.error('Błąd', {
-				description: 'Nie udało się pobrać listy zamówień.',
+				description: error?.message,
 				action: { label: 'Ponów', onClick: () => refetch()}
 			})
 		} else if (error){
@@ -152,7 +156,12 @@ export default function Dashboard() {
 						</div>
 					:
 						<div className="flex flex-col items-center gap-4">
-							<OrdersTable orders={data?.orders} isLoading={isLoading} sortFunc={sortFunc}/>
+							<OrdersTable 
+								orders={data?.orders} 
+								isLoading={isLoading} 
+								sortFunc={sortFunc}
+								setSelectedOrder={setSelectedOrder}
+							/>
 
 							{(data && query.page) &&
 								<Pagination>
@@ -213,6 +222,12 @@ export default function Dashboard() {
 					}
 				</>
 			}
+
+			<OrderSidebar
+				orderId={selectedOrder}
+				open={!!selectedOrder}
+				onClose={() => setSelectedOrder(null)} 
+			/>
 		</section>
 	)
 }

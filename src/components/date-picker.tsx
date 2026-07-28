@@ -42,43 +42,46 @@ export function DateRangePicker({ getDate }: { getDate: (date: { dateFrom?: stri
 	}
 
 	return (
-		<div className="flex items-center gap-2">
-			<Popover>
-				<PopoverTrigger className="flex h-9 w-36 items-center gap-2 rounded-md border px-3 text-sm">
-					<CalendarIcon size={16} />
-					{dateFrom ? format(dateFrom, "dd.MM.yyyy") : "Od daty"}
-				</PopoverTrigger>
+		<div>
+			<small>Przedział dat</small>
+			<div className="flex items-center gap-2 mt-1">
+				<Popover>
+					<PopoverTrigger className="flex h-8 w-36 items-center gap-2 rounded-md border px-3 text-sm">
+						<CalendarIcon size={16} />
+						{dateFrom ? format(dateFrom, "dd.MM.yyyy") : "Od daty"}
+					</PopoverTrigger>
 
-				<PopoverContent className="w-auto p-0">
-					<Calendar mode="single" selected={dateFrom} onSelect={updateFrom} />
-				</PopoverContent>
-			</Popover>
+					<PopoverContent className="w-auto p-0">
+						<Calendar mode="single" selected={dateFrom} onSelect={updateFrom} />
+					</PopoverContent>
+				</Popover>
 
-			<span>-</span>
+				<span>-</span>
 
-			<Popover>
-				<PopoverTrigger className="flex h-9 w-36 items-center gap-2 rounded-md border px-3 text-sm">
-					<CalendarIcon size={16} />
-					{dateTo ? format(dateTo, "dd.MM.yyyy") : "Do daty"}
-				</PopoverTrigger>
+				<Popover>
+					<PopoverTrigger className="flex h-8 w-36 items-center gap-2 rounded-md border px-3 text-sm">
+						<CalendarIcon size={16} />
+						{dateTo ? format(dateTo, "dd.MM.yyyy") : "Do daty"}
+					</PopoverTrigger>
 
-				<PopoverContent className="w-auto p-0">
-					<Calendar mode="single" selected={dateTo} onSelect={updateTo} />
-				</PopoverContent>
-			</Popover>
+					<PopoverContent className="w-auto p-0">
+						<Calendar mode="single" selected={dateTo} onSelect={updateTo} />
+					</PopoverContent>
+				</Popover>
 
-			<Button
-				size="icon"
-				variant="secondary"
-				onClick={() => {
-					getDate({
-						dateFrom: undefined,
-						dateTo: undefined,
-					})
-				}}
-			>
-				<Redo2 />
-			</Button>
+				<Button
+					size="icon"
+					variant="secondary"
+					onClick={() => {
+						getDate({
+							dateFrom: undefined,
+							dateTo: undefined,
+						})
+					}}
+				>
+					<Redo2 />
+				</Button>
+			</div>
 		</div>
 	)
 }

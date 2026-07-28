@@ -11,12 +11,12 @@ export default function DebouncedInput({
 	value,
 	setValue
 }: {
-	debouncedFunction: (value: string | undefined) => void
+	debouncedFunction: (value: string) => void
 	delay?: number
 	loading: boolean
 	placeholder?: string
-	value: string | undefined
-	setValue: Dispatch<SetStateAction<string | undefined>>
+	value: string
+	setValue: Dispatch<SetStateAction<string>>
 }) {
 	const isFirstRender = useRef(true);
 
