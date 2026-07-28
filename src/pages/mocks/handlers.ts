@@ -2,7 +2,7 @@ import { http, HttpResponse } from 'msw'
 import { orders } from './data-generator'
 import { simulateNetwork } from './utils'
 import { DEFAULT_PAGE_SIZE, PAGE_SIZES } from '@/lib/constants'
-import { ChangeOrderStatusSchema, OrderStatusType } from '@/schema'
+import { BulkStatusChangeSchema, BulkStatusResponseType, ChangeOrderStatusSchema, OrderStatusType } from '@/schema'
 import { endOfDay, isAfter, isBefore, parseISO, startOfDay } from "date-fns"
 import { canChangeStatus } from '@/lib/helpers'
 
@@ -156,20 +156,45 @@ export const handlers = [
 		return HttpResponse.json(updatedOrder)
 	}),
 
-	http.post('/api/orders/bulk-status', async () => {
+	http.post('/api/orders/bulk-status', async ({ request }) => {
 		const error = await simulateNetwork()
 
 		if (error) return error
 
-		return HttpResponse.json({
-			success: [1, 2, 3],
-			failed: [
+		const body = BulkStatusChangeSchema.parse(await request.json())
+
+		const success: BulkStatusResponseType['success'] = []
+		const failed: BulkStatusResponseType['failed'] = []
+
+		body.ids.forEach(id => {
+			const order = orders.find(order => order.id === id)
+
+			if (!order) {
+				failed.push({ id, reason: "Zamówienie nie istnieje" })
+				return
+			}
+
+			if (!canChangeStatus(order.status, body.status)) {
+				failed.push({ id, reason: `Nie można zmienić statusu z ${order.status} na ${body.status}` })
+				return
+			}
+
+			const previousStatus = order.status
+			order.status = body.status
+
+			order.orderHistory = [
+				...(order.orderHistory ?? []),
 				{
-					id: 4,
-					reason: 'blad',
+					from: previousStatus,
+					to: body.status,
+					createdAt: new Date().toISOString(),
 				},
-			],
+			]
+
+			success.push(id)
 		})
+
+		return HttpResponse.json({ success, failed })
 	}),
 
 	http.get('/api/orders/stats', async () => {

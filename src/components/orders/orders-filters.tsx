@@ -9,16 +9,7 @@ import { DateRangePicker } from "../date-picker"
 import { OrderStatusType } from "@/schema"
 import { Button } from "../ui/button"
 import { Redo2 } from "lucide-react"
-
-const statuses: OrderStatusType[] = [
-	'NOWE',
-	'OPŁACONE',
-	'SPAKOWANE',
-	'WYSŁANE',
-	'DOSTARCZONE',
-	'ZWROT',
-	'ANULOWANE',
-]
+import { statuses } from "@/lib/constants"
 
 export default function OrdersFilters() {
 	const router = useRouter()

@@ -1,11 +1,11 @@
-import { useQuery } from "@tanstack/react-query"
-import { getOrders } from "@/lib/endpoints"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { getOrders, postOrdersBulkStatus } from "@/lib/endpoints"
 import { handleApiResponse } from "@/lib/helpers"
 import { Pagination, PaginationContent, PaginationItem, PaginationNext, PaginationPrevious } from "@/components/ui/pagination"
 import { toast } from "sonner"
 import { useEffect, useState } from "react"
 import { useRouter } from "next/router"
-import { GetOrdersSchema } from "@/schema"
+import { BulkStatusResponseSchema, GetOrdersSchema, OrderStatusType } from "@/schema"
 import OrdersTable from "@/components/orders/orders-table"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -13,9 +13,12 @@ import DebouncedInput from "@/components/debounced-input"
 import PaginationLimit from "@/components/orders/orders-pagination-limit"
 import OrdersFilters from "@/components/orders/orders-filters"
 import { OrderSidebar } from "@/components/orders/order-sidebar"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { statuses } from "@/lib/constants"
 
 export default function Dashboard() {
 	const router = useRouter()
+	const queryClient = useQueryClient()
 	const query = router.query
 
 	const [ pageInput, setPageInput ] = useState(String(query.page))
@@ -31,6 +34,7 @@ export default function Dashboard() {
 			.then(data => GetOrdersSchema.parse(data)),
 	})
 	const [ selectedOrder, setSelectedOrder ] = useState<number | null>(null)
+	const [ selectedOrders, setSelectedOrders ] = useState<number[]>([])
 
 	const hasFilters = Boolean(
 		query.search ||
@@ -84,16 +88,48 @@ export default function Dashboard() {
 		)
 	}
 
+	const checkOrder = (id: number) => {
+		setSelectedOrders(prev =>
+			prev.includes(id) ? prev.filter(orderId => orderId !== id) : [...prev, id]
+		)
+	}
+
+	const bulkStatusMutation = useMutation({
+		mutationFn: ({ ids, status }: { ids: number[], status: OrderStatusType }) =>
+			postOrdersBulkStatus({ ids, status })
+				.then(resp => handleApiResponse({ resp }))
+				.then(data => BulkStatusResponseSchema.parse(data))
+		,
+
+		onSuccess: result => {
+			queryClient.invalidateQueries({ queryKey: ["orders"] })
+			setSelectedOrders([])
+
+			if (result.failed.length) {
+				toast.warning(
+					`Zmieniono ${result.success.length} z ${result.success.length + result.failed.length} zamówień`,
+					{ description: result.failed[0].reason }
+				)
+
+				return
+			}
+
+			toast.success(
+				`Zmieniono ${result.success.length} zamówień`
+			)
+		}
+	})
+
 	useEffect(() => {
 		if (!data) return
 
 		if ((Number(query.page) > data.pagination.totalPages) && data.pagination.totalPages) {
 			router.replace({
-				query: {
-					...router.query,
-					page: data.pagination.totalPages,
-				},
-			}, undefined, { shallow: true })
+				query: { ...router.query, page: data.pagination.totalPages },
+			}, 
+			undefined, 
+			{ shallow: true })
+			
 			setPageInput(String(data.pagination.totalPages))
 		} else {
 			setPageInput(String(query.page))
@@ -139,6 +175,31 @@ export default function Dashboard() {
 						<div className="mt-4 overflow-x-auto">
 							<OrdersFilters/>
 						</div>
+						{!!selectedOrders.length &&
+							<div className="flex items-center gap-4 mt-4 bg-blue-500/10 rounded-2xl px-4 py-2">
+								<small>Zaznaczono: {selectedOrders.length}</small>
+
+								<Select
+									disabled={bulkStatusMutation.isPending}
+									onValueChange={status =>
+										bulkStatusMutation.mutate({
+											ids: selectedOrders,
+											status: status as OrderStatusType,
+										})
+									}
+								>
+									<SelectTrigger className="w-48">
+										<SelectValue placeholder="Zmień status" />
+									</SelectTrigger>
+
+									<SelectContent>
+										{statuses.map(status => (
+											<SelectItem key={status} value={status}>{status}</SelectItem>
+										))}
+									</SelectContent>
+								</Select>
+							</div>
+						}
 					</div>
 					{(!data?.orders.length && !isLoading) ?
 						<div className="rounded-lg border p-8 text-center mt-8">
@@ -161,6 +222,9 @@ export default function Dashboard() {
 								isLoading={isLoading} 
 								sortFunc={sortFunc}
 								setSelectedOrder={setSelectedOrder}
+								selectedOrders={selectedOrders}
+								checkOrder={checkOrder}
+								setSelectedOrders={setSelectedOrders}
 							/>
 
 							{(data && query.page) &&

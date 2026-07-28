@@ -1,17 +1,20 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { OrderType } from '@/schema';
 import { useRouter } from 'next/router';
 import { format } from 'date-fns';
 import type { Dispatch, SetStateAction } from 'react';
+import { Checkbox } from '../ui/checkbox';
 
-export default function OrdersTable({ orders, isLoading, sortFunc, setSelectedOrder }: { 
+export default function OrdersTable({ orders, isLoading, sortFunc, setSelectedOrder, selectedOrders, setSelectedOrders, checkOrder }: { 
 	orders: OrderType[] | undefined 
 	isLoading: boolean 
 	sortFunc: (sortBy: 'createdAt' | 'total') => void
 	setSelectedOrder: Dispatch<SetStateAction<number | null>>
+	selectedOrders: number[]
+	setSelectedOrders: Dispatch<SetStateAction<number[]>>
+	checkOrder: (id: number) => void
 }) {
 	const router = useRouter()
 
@@ -19,6 +22,14 @@ export default function OrdersTable({ orders, isLoading, sortFunc, setSelectedOr
 		<Table className="mt-8">
 			<TableHeader>
 				<TableRow>
+					<TableHead>
+						<Checkbox
+							checked={selectedOrders.length === orders?.length}
+							onCheckedChange={checked => {
+								setSelectedOrders((checked && orders) ? orders.map(order => order.id) : [])
+							}}
+						/>
+					</TableHead>
 					<TableHead>Numer zamówienia</TableHead>
 					<TableHead className="cursor-pointer text-blue-500 hover:opacity-50" onClick={() => sortFunc("createdAt")}>
 						<div className="flex gap-2">
@@ -42,24 +53,13 @@ export default function OrdersTable({ orders, isLoading, sortFunc, setSelectedOr
 					{Array.from({ length: 10 })
 						.map((_, i) => 
 							<TableRow key={i}>
-								<TableCell className="font-semibold">
-									<Skeleton className="h-8 w-full" />
-								</TableCell>
-								<TableCell className="font-semibold">
-									<Skeleton className="h-8 w-full" />
-								</TableCell>
-								<TableCell className="font-semibold">
-									<Skeleton className="h-8 w-full" />
-								</TableCell>
-								<TableCell>
-									<Skeleton className="h-8 w-full" />
-								</TableCell>
-								<TableCell>
-									<Skeleton className="h-8 w-full" />
-								</TableCell>
-								<TableCell className="text-right">
-									<Skeleton className="h-8 w-full" />
-								</TableCell>
+								<TableCell className="font-semibold"><Skeleton className="h-8 w-full" /></TableCell>
+								<TableCell className="font-semibold"><Skeleton className="h-8 w-full" /></TableCell>
+								<TableCell className="font-semibold"><Skeleton className="h-8 w-full" /></TableCell>
+								<TableCell className="font-semibold"><Skeleton className="h-8 w-full" /></TableCell>
+								<TableCell className="font-semibold"><Skeleton className="h-8 w-full" /></TableCell>
+								<TableCell className="font-semibold"><Skeleton className="h-8 w-full" /></TableCell>
+								<TableCell className="font-semibold"><Skeleton className="h-8 w-full" /></TableCell>
 							</TableRow>
 						)
 					}
@@ -68,6 +68,12 @@ export default function OrdersTable({ orders, isLoading, sortFunc, setSelectedOr
 				<TableBody>
 					{orders?.map(order => 
 						<TableRow key={order.id}>
+							<TableCell>
+								<Checkbox
+									checked={selectedOrders.includes(order.id)}
+									onCheckedChange={() => checkOrder(order.id)}
+								/>
+							</TableCell>
 							<TableCell className="font-semibold">
 								{order.number}
 							</TableCell>

@@ -46,7 +46,7 @@ export const getOrderStats = () => {
 	})
 }
 
-export const postOrdersBulkStatus = (statusData: { orders: number[] }) => {
+export const postOrdersBulkStatus = (statusData: { ids: number[], status: OrderStatusType }) => {
 	return fetch(`${process.env.NEXT_PUBLIC_API_URL + ordersUrl}/bulk-status`, {
 		headers: { 'content-type': 'application/json' },
 		method: 'POST',

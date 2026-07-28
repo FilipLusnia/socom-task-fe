@@ -51,3 +51,19 @@ export const GetOrdersSchema = z.object({
 export const ChangeOrderStatusSchema = z.object({
 	status: OrderStatusSchema,
 })
+
+export const BulkStatusChangeSchema = z.object({
+	ids: z.array(z.number()),
+	status: OrderStatusSchema,
+})
+
+export type BulkStatusResponseType = z.infer<typeof BulkStatusResponseSchema>
+export const BulkStatusResponseSchema = z.object({
+	success: z.array(z.number()),
+	failed: z.array(
+		z.object({
+			id: z.number(),
+			reason: z.string(),
+		})
+	),
+})
