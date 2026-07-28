@@ -69,18 +69,11 @@ export function DateRangePicker({ getDate }: { getDate: (date: { dateFrom?: stri
 					</PopoverContent>
 				</Popover>
 
-				<Button
-					size="icon"
-					variant="secondary"
-					onClick={() => {
-						getDate({
-							dateFrom: undefined,
-							dateTo: undefined,
-						})
-					}}
-				>
-					<Redo2 />
-				</Button>
+				{(dateFrom || dateTo) &&
+					<Button variant="outline" size="icon" onClick={() => getDate({ dateFrom: undefined, dateTo: undefined })}>
+						<Redo2 />
+					</Button>
+				}
 			</div>
 		</div>
 	)

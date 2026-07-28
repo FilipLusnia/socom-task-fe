@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button"
 import DebouncedInput from "@/components/debounced-input"
 import PaginationLimit from "@/components/orders/orders-pagination-limit"
 import OrdersFilters from "@/components/orders/orders-filters"
-import { OrderSidebar } from "@/components/order-sidebar"
+import { OrderSidebar } from "@/components/orders/order-sidebar"
 
 export default function Dashboard() {
 	const router = useRouter()

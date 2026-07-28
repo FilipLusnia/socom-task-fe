@@ -8,7 +8,7 @@ import { getSingleOrder } from "@/lib/endpoints"
 import { handleApiResponse } from "@/lib/helpers"
 import { OrderSchema } from "@/schema"
 import { useQuery } from "@tanstack/react-query"
-import { Skeleton } from "./ui/skeleton"
+import { Skeleton } from "../ui/skeleton"
 import { format } from "date-fns"
 
 export function OrderSidebar({ orderId, open, onClose }: {

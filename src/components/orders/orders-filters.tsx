@@ -1,7 +1,14 @@
 import { useRouter } from "next/router"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import {
+	DropdownMenu,
+	DropdownMenuCheckboxItem,
+	DropdownMenuContent,
+	DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { DateRangePicker } from "../date-picker"
 import { OrderStatusType } from "@/schema"
+import { Button } from "../ui/button"
+import { Redo2 } from "lucide-react"
 
 const statuses: OrderStatusType[] = [
 	'NOWE',
@@ -16,51 +23,71 @@ const statuses: OrderStatusType[] = [
 export default function OrdersFilters() {
 	const router = useRouter()
 
-	const updateFilter = (key: string, value: string | undefined) => {
+	const selectedStatuses = Array.isArray(router.query.status) ?
+		router.query.status 
+	: 
+		router.query.status ? [router.query.status] : []
+
+	const toggleStatus = (status: OrderStatusType, checked: boolean) => {
+		const next = checked ? [...selectedStatuses, status] : selectedStatuses.filter(item => item !== status)
+
 		router.push({
 			pathname: router.pathname,
-			query: {
-				...router.query,
-				page: 1,
-				[key]: value || undefined,
-			},
-		}, undefined, { shallow: true })
+			query: { ...router.query, page: 1, status: next.length ? next : undefined },
+		}, 
+		undefined, 
+		{ shallow: true })
+	}
+
+	const resetStatuses = () => {
+		router.push({
+			pathname: router.pathname,
+			query: { ...router.query, page: 1, status: undefined },
+		}, 
+		undefined, 
+		{ shallow: true })
 	}
 
 	return (
 		<div className="flex gap-8">
 			<div>
 				<small className="inline-block mb-1">Status</small>
-				<Select
-					value={String(router.query.status || 'Wszystkie')}
-					onValueChange={value => updateFilter('status', value === 'Wszystkie' ? undefined : String(value))}
-				>
-					<SelectTrigger className="w-40">
-						<SelectValue placeholder="Status" />
-					</SelectTrigger>
 
-					<SelectContent>
-						<SelectItem value="Wszystkie">Wszystkie</SelectItem>
-						{statuses.map(status =>
-							<SelectItem key={status} value={status}>
-								{status}
-							</SelectItem>
-						)}
-					</SelectContent>
-				</Select>
+				<div className="flex items-center gap-2">
+					<DropdownMenu>
+						<DropdownMenuTrigger className="flex h-8 w-40 items-center justify-between rounded-md border px-3 text-sm">
+							{selectedStatuses.length ? `${selectedStatuses.length} wybrane` : "Wszystkie"}
+						</DropdownMenuTrigger>
+
+						<DropdownMenuContent className="w-40">
+							{statuses.map(status => (
+								<DropdownMenuCheckboxItem
+									key={status}
+									checked={selectedStatuses.includes(status)}
+									onCheckedChange={checked => toggleStatus(status, checked)}
+								>
+									{status}
+								</DropdownMenuCheckboxItem>
+							))}
+						</DropdownMenuContent>
+					</DropdownMenu>
+
+					{!!selectedStatuses.length &&
+						<Button variant="outline" size="icon" onClick={resetStatuses}>
+							<Redo2 />
+						</Button>
+					}
+				</div>
 			</div>
 
 			<DateRangePicker
 				getDate={({ dateFrom, dateTo }) => {
 					router.push({
 						pathname: router.pathname,
-						query: {
-							...router.query,
-							page: 1,
-							dateFrom: dateFrom,
-							dateTo: dateTo,
-						},
-					}, undefined, { shallow: true })
+						query: { ...router.query, page: 1, dateFrom, dateTo },
+					}, 
+					undefined, 
+					{ shallow: true })
 				}}
 			/>
 		</div>
