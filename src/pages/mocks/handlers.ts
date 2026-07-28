@@ -75,7 +75,7 @@ export const handlers = [
 				page,
 				limit,
 				total: orders.length,
-				totalPages: Math.ceil(orders.length / limit),
+				totalPages: Math.ceil(filteredOrders.length / limit),
 			},
 		})
 	}),
