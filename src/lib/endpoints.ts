@@ -1,10 +1,11 @@
-import { OrdersQueryType, OrderStatusType } from "@/schema";
+import { OrderStatusType } from "@/schema";
+import type { ParsedUrlQuery } from "querystring"
 
 
 // ORDERS
 const ordersUrl = '/orders';
 
-export const getOrders = (query: OrdersQueryType) => {
+export const getOrders = (query: ParsedUrlQuery) => {
 	const params = new URLSearchParams()
 
 	Object.entries(query).forEach(([key, value]) => {

@@ -1,22 +1,22 @@
 import { Input } from "@/components/ui/input";
-import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useRef } from "react";
 import { Button } from "./ui/button";
 import { X } from "lucide-react";
 
 export default function DebouncedInput({ 
 	debouncedFunction, 
-	delay = 500, 
+	delay = 1000, 
 	loading, 
 	placeholder,
 	value,
 	setValue
 }: {
-	debouncedFunction: (value: string) => void
+	debouncedFunction: (value: string | undefined) => void
 	delay?: number
 	loading: boolean
 	placeholder?: string
-	value: string
-	setValue: Dispatch<SetStateAction<string>>
+	value: string | undefined
+	setValue: Dispatch<SetStateAction<string | undefined>>
 }) {
 	const isFirstRender = useRef(true);
 
@@ -38,7 +38,7 @@ export default function DebouncedInput({
 				onChange={e => setValue(e.target.value)} 
 				className={loading ? 'animate-pulse' : ''}
 			/>
-			{!!value.length &&
+			{!!value?.length &&
 				<Button onClick={() => setValue('')}><X/></Button>
 			}
 		</div>

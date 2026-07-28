@@ -7,7 +7,6 @@ import { ThemeProvider } from "next-themes"
 
 import '@/styles/globals.css';
 import { useEffect, useState } from 'react';
-import { TruckElectric } from 'lucide-react';
 
 const RalewayFont = localFont({
 	src: [

@@ -1,8 +1,9 @@
 import { http, HttpResponse } from 'msw'
 import { orders } from './data-generator'
 import { simulateNetwork } from './utils'
-import { DEFAULT_PAGE_SIZE } from '@/lib/constants'
+import { DEFAULT_PAGE_SIZE, PAGE_SIZES } from '@/lib/constants'
 import { OrderStatusType } from '@/schema'
+import { endOfDay, isAfter, isBefore, parseISO, startOfDay } from "date-fns"
 
 export const handlers = [
 	http.get('/api/orders', async ({ request }) => {
@@ -21,26 +22,58 @@ export const handlers = [
 		} 
 
 		const limit = Number(url.searchParams.get('limit') || DEFAULT_PAGE_SIZE)
-		if (!Number.isInteger(limit)) {
+		if (!PAGE_SIZES.includes(limit)) {
 			return HttpResponse.json(
-				{ message: 'Bład walidacji parametru limit' },
+				{ message: 'Błędna wartość parametru limit' },
 				{ status: 400 }
 			)
-		} 
+		}
+
+		let filteredOrders = [ ...orders ]
+
+		const search = url.searchParams.get("search")?.trim().toLowerCase()
+		if (search) {
+			filteredOrders = filteredOrders.filter(order =>
+				order.number.toLowerCase().includes(search) ||
+				order.customer.email.toLowerCase().includes(search)
+			)
+		}
+
+		const statuses = url.searchParams.getAll("status")
+
+		if (statuses.length) {
+			filteredOrders = filteredOrders.filter(order =>
+				statuses.includes(order.status)
+			)
+		}
 
 		const dateFrom = url.searchParams.get("dateFrom")
 		const dateTo = url.searchParams.get("dateTo")
+
+		if (dateFrom) {
+			const from = startOfDay(parseISO(dateFrom))
+
+			filteredOrders = filteredOrders.filter(order =>
+				!isBefore(parseISO(order.createdAt), from)
+			)
+		}
+
+		if (dateTo) {
+			const to = endOfDay(parseISO(dateTo))
+
+			filteredOrders = filteredOrders.filter(order =>
+				!isAfter(parseISO(order.createdAt), to)
+			)
+		}
 
 		const start = (page - 1) * limit
 		const end = start + limit
 
 		return HttpResponse.json({
-			orders: orders.slice(start, end),
+			orders: filteredOrders.slice(start, end),
 			pagination: {
 				page,
 				limit,
-				dateFrom,
-				dateTo,
 				total: orders.length,
 				totalPages: Math.ceil(orders.length / limit),
 			},
