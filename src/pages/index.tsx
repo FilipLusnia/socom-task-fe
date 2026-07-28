@@ -62,6 +62,24 @@ export default function Dashboard() {
 		)
 	}
 
+	const sortFunc = (sortBy: 'createdAt' | 'total') => {
+		const currentSortOrder = router.query.sortOrder
+
+		router.push(
+			{
+				pathname: router.pathname,
+				query: {
+					...router.query,
+					page: 1,
+					sortBy,
+					sortOrder: currentSortOrder === 'desc' ? 'asc' : 'desc',
+				},
+			},
+			undefined,
+			{ shallow: true }
+		)
+	}
+
 	useEffect(() => {
 		if (!data) return
 
@@ -99,8 +117,6 @@ export default function Dashboard() {
 		<section>
 			<h1 className="text-2xl font-semibold">Zamówienia</h1>
 
-		
-
 			{error ? 
 				<div className="rounded-lg border p-8 flex flex-col items-center gap-4 mt-8">
 					<h2 className="font-medium">Nie udało się pobrać listy zamówień.</h2>
@@ -136,7 +152,7 @@ export default function Dashboard() {
 						</div>
 					:
 						<div className="flex flex-col items-center gap-4">
-							<OrdersTable orders={data?.orders} isLoading={isLoading}/>
+							<OrdersTable orders={data?.orders} isLoading={isLoading} sortFunc={sortFunc}/>
 
 							{(data && query.page) &&
 								<Pagination>

@@ -66,6 +66,19 @@ export const handlers = [
 			)
 		}
 
+		const sortBy = url.searchParams.get("sortBy")
+		const sortOrder = url.searchParams.get("sortOrder") === "asc" ? "asc" : "desc"
+
+		if (sortBy === "createdAt") {
+			filteredOrders.sort((a, b) =>
+				sortOrder === "asc" ? a.createdAt.localeCompare(b.createdAt) : b.createdAt.localeCompare(a.createdAt)
+			)
+		}
+
+		if (sortBy === "total") {
+			filteredOrders.sort((a, b) => sortOrder === "asc" ? (a.total - b.total) : (b.total - a.total))
+		}
+
 		const start = (page - 1) * limit
 		const end = start + limit
 

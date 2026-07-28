@@ -28,7 +28,7 @@ export default function OrdersFilters() {
 	}
 
 	return (
-		<div className="flex justify-end gap-4">
+		<div className="flex gap-4">
 			<Select
 				value={String(router.query.status || 'Wszystkie')}
 				onValueChange={value => updateFilter('status', value === 'Wszystkie' ? undefined : String(value))}
