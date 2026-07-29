@@ -4,6 +4,10 @@ Stack: Next.js, TS, React Query, Zod, Tailwind + shadcn, MSW
 
 Next został użyty ze względu na prostotę tworzenia projektu i wygodę, nie ze względu na potencjał użycia SSR/SSG - aplikacja wertuje duże ilości danych, co w takim przypadku mogło by już mocno obciążać serwer
 
+Standardowa procedura uruchomienia:
+- `npm i`
+- `npm run dev`
+
 ## Funkcjonalności
 
 ### Lista zamówień
