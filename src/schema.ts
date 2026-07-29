@@ -21,6 +21,8 @@ export const OrderHistorySchema = z.object({
 	from: OrderStatusSchema.nullable(),
 	to: OrderStatusSchema,
 	createdAt: z.iso.datetime(),
+	user: z.string(),
+	reason: z.string().nullable(),
 })
 
 export type OrderType = z.infer<typeof OrderSchema>

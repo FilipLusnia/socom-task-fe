@@ -39,17 +39,17 @@ export const changeOrderStatus = ({ id, status }: { id: number, status: OrderSta
 	})
 }
 
-export const getOrderStats = () => {
-	return fetch(`${process.env.NEXT_PUBLIC_API_URL + ordersUrl}/stats`, { 
-		method: 'GET',
-		headers: { 'content-type': 'application/json' } 
-	})
-}
-
 export const postOrdersBulkStatus = (statusData: { ids: number[], status: OrderStatusType }) => {
 	return fetch(`${process.env.NEXT_PUBLIC_API_URL + ordersUrl}/bulk-status`, {
 		headers: { 'content-type': 'application/json' },
 		method: 'POST',
 		body: JSON.stringify(statusData)
+	})
+}
+
+export const getOrderStats = () => {
+	return fetch(`${process.env.NEXT_PUBLIC_API_URL + ordersUrl}/stats`, { 
+		method: 'GET',
+		headers: { 'content-type': 'application/json' } 
 	})
 }

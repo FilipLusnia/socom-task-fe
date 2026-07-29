@@ -52,6 +52,8 @@ export default function Dashboard() {
 			undefined,
 			{ shallow: true }
 		)
+
+		window.scrollTo(0, 0)
 	}
 
 	const searchFunc = (value?: string) => {
@@ -129,7 +131,7 @@ export default function Dashboard() {
 			}, 
 			undefined, 
 			{ shallow: true })
-			
+
 			setPageInput(String(data.pagination.totalPages))
 		} else {
 			setPageInput(String(query.page))

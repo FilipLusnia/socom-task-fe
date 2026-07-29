@@ -41,27 +41,25 @@ export function OrderSidebar({ orderId, open, onClose }: {
 
 		onMutate: async newStatus => {
 			await queryClient.cancelQueries({ queryKey: ["order", orderId] })
+			await queryClient.cancelQueries({ queryKey: ["orders"] })
 
 			const previousOrder = queryClient.getQueryData<OrderType>(["order", orderId])
+			const previousOrders = queryClient.getQueriesData({ queryKey: ["orders"] })
 
-			queryClient.setQueryData(["order", orderId], (old: OrderType) => {
+			queryClient.setQueryData<OrderType>(["order", orderId], old => {
 				if (!old) return old
-
-				return {
-					...old,
-					status: newStatus,
-					orderHistory: [
-						...(old.orderHistory || []),
-						{
-							from: old.status,
-							to: newStatus,
-							createdAt: new Date().toISOString(),
-						},
-					],
-				}
+				return { ...old, status: newStatus }
 			})
 
-			return { previousOrder }
+			queryClient.setQueriesData({ queryKey: ["orders"] }, (old: GetOrdersType) => {
+				if (!old) return old
+
+				return { ...old, orders: old.orders.map(order =>
+					order.id === orderId ? { ...order, status: newStatus } : order
+				)}
+			})
+
+			return { previousOrder, previousOrders }
 		},
 
 		onSuccess: updatedOrder => {
@@ -83,6 +81,10 @@ export function OrderSidebar({ orderId, open, onClose }: {
 			if (context?.previousOrder) {
 				queryClient.setQueryData(["order", orderId], context.previousOrder)
 			}
+
+			context?.previousOrders.forEach(([key, data]) => {
+				queryClient.setQueryData(key, data)
+			})
 
 			toast.error("Nie udało się zmienić statusu", {
 				description: error.message,
@@ -171,6 +173,14 @@ export function OrderSidebar({ orderId, open, onClose }: {
 
 								{entry.from && 
 									<p className="text-xs text-muted-foreground">z {entry.from}</p>
+								}
+
+								{entry.user && 
+									<p className="text-xs text-muted-foreground">{entry.user}</p>
+								}
+
+								{entry.reason && 
+									<p className="text-xs text-muted-foreground">Powód: {entry.reason}</p>
 								}
 							</div>
 						))}

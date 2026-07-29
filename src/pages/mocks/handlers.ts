@@ -146,6 +146,8 @@ export const handlers = [
 					from: previousStatus,
 					to: body.status,
 					createdAt: new Date().toISOString(),
+					user: "example@example.com",
+					reason: 'Testowy powód zmiany statusu',
 				},
 			],
 		}
@@ -188,6 +190,8 @@ export const handlers = [
 					from: previousStatus,
 					to: body.status,
 					createdAt: new Date().toISOString(),
+					user: "example@example.com",
+					reason: 'Testowy powód zmiany statusu',
 				},
 			]
 
@@ -202,17 +206,32 @@ export const handlers = [
 
 		if (error) return error
 
-		return HttpResponse.json({
-			statuses: {
-				NOWE: 12,
-				OPŁACONE: 34,
-				SPAKOWANE: 28,
-				WYSŁANE: 41,
-				DOSTARCZONE: 362,
-				ZWROT: 14,
-				ANULOWANE: 9,
+		const thirtyDaysAgo = new Date()
+		thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
+
+		const statuses = orders.reduce<Record<OrderStatusType, number>>(
+			(acc, order) => {
+				acc[order.status] = acc[order.status] + 1
+				return acc
 			},
-			revenue30Days: 152430.12,
+			{
+				NOWE: 0,
+				OPŁACONE: 0,
+				SPAKOWANE: 0,
+				WYSŁANE: 0,
+				DOSTARCZONE: 0,
+				ZWROT: 0,
+				ANULOWANE: 0,
+			}
+		)
+
+		const revenueLast30Days = orders
+			.filter(order => new Date(order.createdAt) >= thirtyDaysAgo)
+			.reduce((sum, order) => sum + order.total, 0)
+
+		return HttpResponse.json({
+			statuses,
+			revenueLast30Days,
 		})
-	}),
+	})
 ]
